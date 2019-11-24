@@ -13,9 +13,12 @@ const HomePage = `
 <html>
 	<head>
 		<title>Cloud Detect</title>
+		<link href="https://fonts.googleapis.com/css?family=Roboto+Mono:700&display=swap" rel="stylesheet">
 	</head>
-	<body>
-		<h1>{{ .Name }}</h1>
+	<body style="margin: 0; font-family: 'Roboto Mono', monospace;">
+		<div style="display: flex; flex-direction: column; justify-content: center; min-height: 100vh; background: {{ .Color }};">
+			<h1 style="text-align: center; color: white; font-size: 4em;">{{ .Name }}</h1>
+		</div>
 	</body>
 </htlm>
 `
@@ -40,9 +43,9 @@ type result struct {
 }
 
 var es = []endpoint{
-	endpoint{Path: "/latest/meta-data", Cloud: cloud{Name: "AWS"}},
-	endpoint{Path: "/metadata/instance", Cloud: cloud{Name: "Azure"}},
-	endpoint{Path: "/computeMetadata/", Cloud: cloud{Name: "GCP"}},
+	endpoint{Path: "/latest/meta-data", Cloud: cloud{Name: "AWS", Color: "#FF9900"}},
+	endpoint{Path: "/metadata/instance", Cloud: cloud{Name: "Azure", Color: "#007FFF"}},
+	endpoint{Path: "/computeMetadata/", Cloud: cloud{Name: "GCP", Color: "#DB4437"}},
 }
 
 func main() {
