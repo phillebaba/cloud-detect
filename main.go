@@ -33,8 +33,10 @@ type cloud struct {
 }
 
 type endpoint struct {
-	Path  string
-	Cloud cloud
+	Path    string
+	Queries map[string]string
+	Headers map[string]string
+	Cloud   cloud
 }
 
 type result struct {
@@ -44,7 +46,7 @@ type result struct {
 
 var es = []endpoint{
 	endpoint{Path: "/latest/meta-data", Cloud: cloud{Name: "AWS", Color: "#FF9900"}},
-	endpoint{Path: "/metadata/instance", Cloud: cloud{Name: "Azure", Color: "#007FFF"}},
+	endpoint{Path: "/metadata/instance", Headers: map[string]string{"Metadata": "true"}, Queries: map[string]string{"api-version": "2019-03-11"}, Cloud: cloud{Name: "Azure", Color: "#007FFF"}},
 	endpoint{Path: "/computeMetadata/", Cloud: cloud{Name: "GCP", Color: "#DB4437"}},
 }
 
@@ -71,7 +73,22 @@ func getCloudProvider(baseUrl string) cloud {
 	c := make(chan result)
 
 	t := func(e endpoint) result {
-		resp, err := netClient.Get(baseUrl + e.Path)
+		req, err := http.NewRequest("GET", baseUrl+e.Path, nil)
+		if err != nil {
+			return result{Error: err}
+		}
+
+		q := req.URL.Query()
+		for k, v := range e.Queries {
+			q.Add(k, v)
+		}
+		req.URL.RawQuery = q.Encode()
+
+		for k, v := range e.Headers {
+			req.Header.Set(k, v)
+		}
+
+		resp, err := netClient.Do(req)
 		if err != nil {
 			return result{Error: err}
 		}
