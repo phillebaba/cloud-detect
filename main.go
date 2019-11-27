@@ -51,6 +51,7 @@ var es = []endpoint{
 func main() {
 	log.Println("Checking cloud provider")
 	c := getCloudProvider("http://169.254.169.254")
+	log.Printf("Running in %s cloud", c.Name)
 
 	t := template.Must(template.New("home").Parse(HomePage))
 	var buffer bytes.Buffer
