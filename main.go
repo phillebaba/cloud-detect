@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -18,6 +19,7 @@ const HomePage = `
 	<body style="margin: 0; font-family: 'Roboto Mono', monospace;">
 		<div style="display: flex; flex-direction: column; justify-content: center; min-height: 100vh; background: {{ .Color }};">
 			<h1 style="text-align: center; color: white; font-size: 4em;">{{ .Name }}</h1>
+			<h2 style="text-align: center; color: white; font-size: 2em;">{{ .Message }}</h2>
 		</div>
 	</body>
 </htlm>
@@ -51,13 +53,25 @@ var es = []endpoint{
 }
 
 func main() {
+	message, _ := os.LookupEnv("MESSAGE")
+
 	log.Println("Checking cloud provider")
 	c := getCloudProvider("http://169.254.169.254")
 	log.Printf("Running in %s cloud", c.Name)
 
+	d := struct {
+		Name    string
+		Color   string
+		Message string
+	}{
+		c.Name,
+		c.Color,
+		message,
+	}
+
 	t := template.Must(template.New("home").Parse(HomePage))
 	var buffer bytes.Buffer
-	if err := t.Execute(&buffer, c); err != nil {
+	if err := t.Execute(&buffer, d); err != nil {
 		log.Fatalf("Could not render html page: %v", err)
 	}
 
@@ -112,7 +126,7 @@ func getCloudProvider(baseUrl string) cloud {
 				return res.Cloud
 			}
 		case <-timeout:
-			return cloud{Name: "Unknown", Color: ""}
+			return cloud{Name: "Unknown", Color: "#A9A9A9"}
 		}
 	}
 }
